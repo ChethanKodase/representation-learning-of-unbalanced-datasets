@@ -4,49 +4,118 @@ import torch
 import torchvision
 from torchvision import transforms, datasets
 from torchvision.datasets import FashionMNIST
-'''train = FashionMNIST(root='.', download=True, train=True, transform = transforms.Compose([transforms.Resize(32),
-                                                                                 transforms.ToTensor(), 
-                                                                                 transforms.Lambda(lambda x: x.repeat(1, 1, 1))
-                                                                                 ]))'''
+import matplotlib
+import matplotlib.pyplot as plt
 
 
-'''fashionmnist_data = torchvision.datasets.FashionMNIST(download=True, root = 'data/fashionmnist', transform = 
-                                                                                transforms.Compose([transforms.Resize(32),
-                                                                                transforms.ToTensor(), 
-                                                                                transforms.Lambda(lambda x: x.repeat(1, 1, 1))
-                                                                                ]))'''
-
-train_set = torchvision.datasets.FashionMNIST("./data", download=True, transform=
-                                                transforms.Compose([transforms.Resize(64),transforms.ToTensor()]))
+train_loader, test_loader, noChannels, dx, dy = getDataset(dataset = "FashionMNIST", batch_size = 60000)  # FashionMNIST , MNIST
 
 
-'''fashionmnist_data_test = torchvision.datasets.FashionMNIST(download=True, root = 'data/fashionmnist', train=False, transform = 
-                                                                                transforms.Compose([transforms.Resize(32),
-                                                                                transforms.ToTensor(), 
-                                                                                transforms.Lambda(lambda x: x.repeat(1, 1, 1))
-                                                                                ]))'''
+training_data, training_labels = next(iter(train_loader))
+
+class_indices_ = []
 
 
-training_data, training_labels = train_set.data, train_set.targets
+for i in range(10): class_indices_.append(torch.where(training_labels==i)[0])
+    
+unbalancing_fractions = [0.5, 0.8, 0.3, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
 
-print('X.shape', training_data.shape)
+imabalanced_class_indices = []
 
-print('y.shape', training_labels.shape) 
 
-print('training_labels[:10]', training_labels[:10])
+for i in range(len(unbalancing_fractions)): 
+    imabalanced_class_indices.append(class_indices_[i][:int( unbalancing_fractions[i]*len(class_indices_[i]))])
 
-check = torch.where(training_labels==0)[0]
 
-print('check', check)
+print('First this : imabalanced_class_indices', imabalanced_class_indices)
 
-print('check.shape', check.shape)
+# printing the populations
 
-seggregate = training_data[check]
+for i in range(len(imabalanced_class_indices)):
+    print('class '+str(i)+' population : ', imabalanced_class_indices[i].shape)  
 
-print('seggregate.shape', seggregate.shape)
+seggregate = training_data[imabalanced_class_indices[9]]
+
+imbalanced_class_indices_merged = torch.tensor([])
+for i in range(len(imabalanced_class_indices)):
+    imbalanced_class_indices_merged = torch.cat((imbalanced_class_indices_merged, imabalanced_class_indices[i].int() ))
+
+imbalanced_class_indices_merged = imbalanced_class_indices_merged
+
+print('imbalanced_class_indices_merged', imbalanced_class_indices_merged)
+
+print('imbalanced_class_indices_merged.shape', imbalanced_class_indices_merged.shape)
+
+print('imbalanced_class_indices_merged.max()', imbalanced_class_indices_merged.max())
+
+print('imbalanced_class_indices_merged.min()', imbalanced_class_indices_merged.min())
+
+
+print(" all indices collected : ", imbalanced_class_indices_merged.shape)
+
+rand_inds = torch.randperm(len(imbalanced_class_indices_merged))
+
+print('rand_inds', rand_inds)
+
+print('rand_inds.max()', rand_inds.max())
+
+print('rand_inds.min()', rand_inds.min())
+
+
+imbal_class_inds_mrgd_shffld = imbalanced_class_indices_merged[rand_inds]
+
+print('imb_class_inss_mrgd_shffld.shape', imbal_class_inds_mrgd_shffld.shape)
+
+print('imbal_class_inds_mrgd_shffld.max()', imbal_class_inds_mrgd_shffld.max())
+
+print('imbal_class_inds_mrgd_shffld.min()', imbal_class_inds_mrgd_shffld.min())
 
 print("till here")
 
+
+
+
+imbal_class_inds_mrgd_shffld = imbal_class_inds_mrgd_shffld.type(torch.int64)
+print("now check : ", imbal_class_inds_mrgd_shffld)
+
+#imbal_class_inds_mrgd_shffld = imbal_class_inds_mrgd_shffld.long()
+imblcnd_shffld_trng_lbls = training_labels[imbal_class_inds_mrgd_shffld]
+
+print('torch.where(imbal_class_inds_mrgd_shffld==0)[0].shape', torch.where(imblcnd_shffld_trng_lbls==0)[0].shape)
+print('torch.where(imbal_class_inds_mrgd_shffld==1)[0].shape', torch.where(imblcnd_shffld_trng_lbls==1)[0].shape)
+print('torch.where(imbal_class_inds_mrgd_shffld==2)[0].shape', torch.where(imblcnd_shffld_trng_lbls==2)[0].shape)
+print('torch.where(imbal_class_inds_mrgd_shffld==3)[0].shape', torch.where(imblcnd_shffld_trng_lbls==3)[0].shape)
+print('torch.where(imbal_class_inds_mrgd_shffld==4)[0].shape', torch.where(imblcnd_shffld_trng_lbls==4)[0].shape)
+print('torch.where(imbal_class_inds_mrgd_shffld==5)[0].shape', torch.where(imblcnd_shffld_trng_lbls==5)[0].shape)
+print('torch.where(imbal_class_inds_mrgd_shffld==6)[0].shape', torch.where(imblcnd_shffld_trng_lbls==6)[0].shape)
+print('torch.where(imbal_class_inds_mrgd_shffld==7)[0].shape', torch.where(imblcnd_shffld_trng_lbls==7)[0].shape)
+print('torch.where(imbal_class_inds_mrgd_shffld==8)[0].shape', torch.where(imblcnd_shffld_trng_lbls==8)[0].shape)
+print('torch.where(imbal_class_inds_mrgd_shffld==9)[0].shape', torch.where(imblcnd_shffld_trng_lbls==9)[0].shape)
+
+
+imbalanced_dataset = training_data[imbal_class_inds_mrgd_shffld]
+
+for i in range(len(imbalanced_dataset) - 13700):
+    print("did this ? execute")
+    plt.imshow(seggregate[i][0])
+    plt.savefig('/home/ramana44/representation-learning-of-unbalanced-datasets/experiments/im_no_'+str(i)+'.png')
+
+'''
+FashionMNIST labels
+
+0: T-shirt/top
+1: Trouser
+2: Pullover
+3: Dress
+4: Coat
+5: Sandal
+6: Shirt
+7: Sneaker
+8: Bag
+9: Ankle boot
+
+'''
+'''print('fixed_x.shape', fixed_x.shape)
 
 train_loader, test_loader, noChannels, dx, dy = getDataset("FashionMNIST")  # FashionMNIST , MNIST
 
@@ -65,6 +134,8 @@ print(test_loader.shape)
 
 for inum, (batch_x, label) in enumerate(test_loader):
     
+    print(batch_x)
+
     if(label==0):
         label0 = torch.cat((label0, batch_x))
     if(label==1):
@@ -88,3 +159,4 @@ for inum, (batch_x, label) in enumerate(test_loader):
     if(inum==100):
         break
 
+'''
