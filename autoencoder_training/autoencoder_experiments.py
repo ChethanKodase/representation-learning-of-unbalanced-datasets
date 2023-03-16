@@ -1,4 +1,3 @@
-from datasets import getDataset, get_train_test_datasets_and_data_in_batches, get_shuffeled_labels_after_imbalancing, get_dataset_class_stats
 import torch
 
 import torchvision
@@ -6,9 +5,11 @@ from torchvision import transforms, datasets
 from torchvision.datasets import FashionMNIST
 import matplotlib
 import matplotlib.pyplot as plt
-
+import os
 from torch import nn
 import torch.nn.functional as F
+
+from datasets import getDataset, get_train_test_datasets_and_data_in_batches, get_shuffeled_labels_after_imbalancing, get_dataset_class_stats
 
 from dataset_imbalancing import create_data_imbalance
 
@@ -51,6 +52,7 @@ lr = 0.0001
 models_avail = ["MLP_AE", "AE_REG"]
 select_model = "MLP_AE"
 
+loss_function = torch.nn.MSELoss()
 
 if(select_model == "MLP_AE"):
     model = AE(inp_dim, hidden_size, latent_dim, no_layers, activation).to(device) # baseline autoencoder
@@ -67,11 +69,18 @@ for epoch in tqdm(range(no_epochs)):
 
         batch_x = batch_x.to(device)
         reconstruction = model(batch_x).view(batch_x.size())
-        loss_reconstruction = F.mse_loss(reconstruction, batch_x)
+        loss_reconstruction = loss_function(reconstruction, batch_x)
 
         optimizer.zero_grad()
         loss_reconstruction.backward()
         optimizer.step()
 
-    print('loss_reconstruction', loss_reconstruction)
-
+        print('loss_reconstruction', loss_reconstruction)
+        path = '/home/ramana44/representation-learning-of-unbalanced-datasets/saved_models/'
+        #path = './output/MRT_full/test_run_saving/'
+        os.makedirs(path, exist_ok=True)
+        name = '_'+select_model+str(hidden_size)+'_'+str(deg_poly)+'_'+str(latent_dim)+'_'+str(lr)+'_'+str(no_layers)#+'_'+str(TDA)
+        
+        #torch.save(loss_arr_val_reco, path+'/loss_arr_val_reco_TDA'+name)
+        #torch.save(loss_arr_val_base, path+'/loss_arr_val_base_TDA'+name)
+        torch.save(model.state_dict(), path+'/model'+name)
