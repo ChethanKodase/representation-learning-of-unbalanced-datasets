@@ -78,16 +78,16 @@ lr = 0.0001
 
 # Available models
 
-models_avail = ["MLP_AE", "AE_REG"]
-select_model = "MLP_AE"
+models_avail = ["MLP-AE", "AE-REG"]
+select_model = "MLP-AE"
 
 
 
-if(select_model == "MLP_AE"):
+if(select_model == "MLP-AE"):
     model = AE(inp_dim, layer_size, latent_dim, no_layers, activation).to(device) # baseline autoencoder
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     loss_function = torch.nn.MSELoss()
-elif(select_model == "AE_REG"):
+elif(select_model == "AE-REG"):
     model = AE(inp_dim, layer_size, latent_dim, no_layers, activation).to(device) # jacobian regularised autoencoder
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
@@ -110,12 +110,13 @@ for epoch in tqdm(range(no_epochs)):
 
     avg_loss = sum(epoch_loss_array)/len(epoch_loss_array)
     loss_array.append(avg_loss)
+
     print("loss : ", avg_loss )
 
 
 
 os.makedirs(path_models, exist_ok=True)
-name = '_'+select_model+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)
+name = '_'+select_model+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
 torch.save(model.state_dict(), path_models+'/model'+name)
 
 plt.plot(list(range(0,no_epochs)), loss_array)
