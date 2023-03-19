@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import os
 from torch import nn
 import torch.nn.functional as F
-
+import numpy as np
 from datasets import getDataset, get_train_test_datasets_and_data_in_batches, get_shuffeled_labels_after_imbalancing, get_dataset_class_stats
 
 from dataset_imbalancing import create_data_imbalance
@@ -16,15 +16,15 @@ from dataset_imbalancing import create_data_imbalance
 from models import AE
 from tqdm import tqdm 
 from activations import Sin
+from train import train_MLPAE, train_AEREG
+from loss_functions import jacobian_regularized_loss
+
 torch.manual_seed(0)
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 ## For saving models and plots ##
-
-path_models = './saved_models/'
-path_plots = './saved_plots/'
 
 # for creating imbalance among the classes in training and test data 
 
@@ -42,8 +42,6 @@ general_class_frac = 0.1
 
 train_class_fracs = [general_class_frac for i in range(number_of_classes)]
 train_class_fracs[majority_class_index] = majority_class_frac
-
-
 test_class_fracs = [general_class_frac for i in range(10)]
 
 print('train_class_fracs', train_class_fracs )
@@ -66,9 +64,9 @@ dataset = "FashionMNIST"
 get_dataset_class_stats(train_class_fracs, test_class_fracs, class_labels, dataset)
 
 
-inp_dim = [no_channels, dx, dy]
 
-# Hyper parameters
+
+# Common feed-foreward hyper parameters
 layer_size = 100
 latent_dim = 4
 no_layers = 3
@@ -76,32 +74,46 @@ activation = Sin()
 no_epochs = 100
 lr = 0.0001
 
-# Available models
 
-models_avail = ["MLP-AE", "AE-REG"]
-select_model = "MLP-AE"
+# parameters specific for jacobian regularized autoencoders
+deg_poly = 21
+use_guidance = False
+alpha = 0.5
+no_samples = 10
+reg_nodes_sampled = "legendre"
+if(reg_nodes_sampled == "legendre"):
+    points = np.polynomial.legendre.leggauss(deg_poly)[0][::-1]
+    weights = np.polynomial.legendre.leggauss(deg_poly)[1][::-1]
+
+if(reg_nodes_sampled == "chebyshev"):
+    points = np.polynomial.chebyshev.chebgauss(deg_poly)[0][::-1]
+    weights = np.polynomial.chebyshev.chebgauss(deg_poly)[1][::-1]
 
 
-
-if(select_model == "MLP-AE"):
-    model = AE(inp_dim, layer_size, latent_dim, no_layers, activation).to(device) # baseline autoencoder
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    loss_function = torch.nn.MSELoss()
-elif(select_model == "AE-REG"):
-    model = AE(inp_dim, layer_size, latent_dim, no_layers, activation).to(device) # jacobian regularised autoencoder
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+train_AE_MLP= False
+train_AE_REG = True
 
 
-loss_C1 = torch.FloatTensor([0.]).to(device) 
+if(train_AE_MLP):
+    train_MLPAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, latent_dim, no_layers, activation, lr, device,
+                dataset, number_of_classes, majority_class_index, majority_class_frac, general_class_frac, set_batch_size)
 
-loss_array = []
+if(train_AE_REG):
+    train_AEREG(no_epochs, train_batches, no_channels, dx, dy, layer_size, latent_dim, no_layers, activation, lr, device,
+                    dataset, number_of_classes, majority_class_index, majority_class_frac, general_class_frac, set_batch_size, 
+                    alpha, no_samples, deg_poly, points, reg_nodes_sampled)
+
+'''loss_array = []
 for epoch in tqdm(range(no_epochs)):
     epoch_loss_array = []
     for inum, batch_x in enumerate(train_batches):
 
         batch_x = batch_x.to(device)
         reconstruction = model(batch_x).view(batch_x.size())
-        loss_reconstruction = loss_function(reconstruction, batch_x)
+
+        loss_reconstruction = jacobian_regularized_loss(model, batch_x, alpha, no_samples, deg_poly,  latent_dim, points, device, guidanceTerm = False)
+
+
         epoch_loss_array.append(loss_reconstruction.item())
 
         optimizer.zero_grad()
@@ -122,4 +134,4 @@ torch.save(model.state_dict(), path_models+'/model'+name)
 plt.plot(list(range(0,no_epochs)), loss_array)
 plt.xlabel("epoch")
 plt.ylabel(select_model+" loss")
-plt.savefig(path_plots+'/loss'+name+'.png')
+plt.savefig(path_plots+'/loss'+name+'.png')'''
