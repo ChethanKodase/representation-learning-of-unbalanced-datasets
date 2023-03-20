@@ -76,3 +76,39 @@ class AE(torch.nn.Module):
         return x
 
 
+
+
+class CNN_AE_fmnist(nn.Module):
+    def __init__(self, latent_dim, no_channels, activation):
+        super().__init__()
+        self.encoder = nn.Sequential(
+            nn.Conv2d(no_channels, 16, 3, stride=2, padding=1),  #N, 16, 16, 16
+            activation,
+            nn.Conv2d(16, 32, 3, stride=2, padding=1),   #N, 32, 8, 8
+            activation,
+            nn.Conv2d(32, 16, 8, stride=2, padding=1),    #N, 64, 2, 2
+            activation,
+            nn.Conv2d(16, 8, 2, stride=2, padding=1),    #N, 64, 1, 1
+            nn.Flatten(1,-1),
+            nn.Linear(8*2*2, latent_dim)
+
+        )
+
+        self.decoder = nn.Sequential(
+            
+            nn.Linear(latent_dim, 8*2*2),
+            nn.Unflatten(1, (8, 2, 2)),
+            nn.ConvTranspose2d(8, 16, 2, stride=2, padding=1),  #N, 32, 8, 8
+            activation,
+            nn.ConvTranspose2d(16, 32, 8, stride=2, padding=1),  #N, 32, 8, 8
+            activation,
+            nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1),   #N, 16, 16, 16
+            activation,
+            nn.ConvTranspose2d(16, no_channels, 3, stride=2, padding=1, output_padding=1),   #N, 1, 32, 32
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        encoded = self.encoder(x)
+        decoded = self.decoder(encoded)
+        return decoded

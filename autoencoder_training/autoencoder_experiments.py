@@ -13,10 +13,10 @@ from datasets import getDataset, get_train_test_datasets_and_data_in_batches, ge
 
 from dataset_imbalancing import create_data_imbalance
 
-from models import AE
+from models import AE, CNN_AE_fmnist
 from tqdm import tqdm 
 from activations import Sin
-from train import train_MLPAE, train_AEREG
+from train import train_MLPAE, train_AEREG, train_CNN_AE_fmnist
 from loss_functions import jacobian_regularized_loss
 
 torch.manual_seed(0)
@@ -34,8 +34,8 @@ class_labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
 number_of_classes =len(class_labels)
-majority_class_index = 9
-majority_class_frac = 0.9
+majority_class_index = 9   # set which is the ,majority class
+majority_class_frac = 0.9  
 general_class_frac = 0.1
 
 
@@ -90,9 +90,16 @@ if(reg_nodes_sampled == "chebyshev"):
     weights = np.polynomial.chebyshev.chebgauss(deg_poly)[1][::-1]
 
 
-train_AE_MLP= False
-train_AE_REG = True
+# parameters specific to CNN-AE
+cnn_activation = torch.nn.ReLU()
+lr_cnn = 1e-3
+weight_decay_cnn = 1e-5
 
+
+
+train_AE_MLP= False
+train_AE_REG = False
+train_CNN_AE = True
 
 if(train_AE_MLP):
     train_MLPAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, latent_dim, no_layers, activation, lr, device,
@@ -103,35 +110,8 @@ if(train_AE_REG):
                     dataset, number_of_classes, majority_class_index, majority_class_frac, general_class_frac, set_batch_size, 
                     alpha, no_samples, deg_poly, points, reg_nodes_sampled)
 
-'''loss_array = []
-for epoch in tqdm(range(no_epochs)):
-    epoch_loss_array = []
-    for inum, batch_x in enumerate(train_batches):
+if(train_CNN_AE):
+    train_CNN_AE_fmnist(no_epochs, train_batches, no_channels, layer_size, latent_dim, no_layers, cnn_activation, lr_cnn, device,
+                    dataset, number_of_classes, majority_class_index, majority_class_frac, general_class_frac, set_batch_size, weight_decay_cnn)
 
-        batch_x = batch_x.to(device)
-        reconstruction = model(batch_x).view(batch_x.size())
-
-        loss_reconstruction = jacobian_regularized_loss(model, batch_x, alpha, no_samples, deg_poly,  latent_dim, points, device, guidanceTerm = False)
-
-
-        epoch_loss_array.append(loss_reconstruction.item())
-
-        optimizer.zero_grad()
-        loss_reconstruction.backward()
-        optimizer.step()
-
-    avg_loss = sum(epoch_loss_array)/len(epoch_loss_array)
-    loss_array.append(avg_loss)
-
-    print("loss : ", avg_loss )
-
-
-
-os.makedirs(path_models, exist_ok=True)
-name = '_'+select_model+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
-torch.save(model.state_dict(), path_models+'/model'+name)
-
-plt.plot(list(range(0,no_epochs)), loss_array)
-plt.xlabel("epoch")
-plt.ylabel(select_model+" loss")
-plt.savefig(path_plots+'/loss'+name+'.png')'''
+                    
