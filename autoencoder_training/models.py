@@ -105,10 +105,46 @@ class CNN_AE_fmnist(nn.Module):
             nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1),   #N, 16, 16, 16
             activation,
             nn.ConvTranspose2d(16, no_channels, 3, stride=2, padding=1, output_padding=1),   #N, 1, 32, 32
-            nn.Sigmoid()
+            activation
         )
 
     def forward(self, x):
+        encoded = self.encoder(x)
+        decoded = self.decoder(encoded)
+        return decoded
+
+
+class Autoencoder_linear_contra_fmnist(nn.Module):
+    def __init__(self,latent_dim, no_channels, dx, dy, layer_size, activation):
+
+        super().__init__()
+        self.encoder = nn.Sequential(
+            nn.Linear(dx*dy, layer_size),  #input layer
+            activation,
+            nn.Linear(layer_size, layer_size),   #h1
+            activation,
+            nn.Linear(layer_size, layer_size),    #h1
+            activation,
+            nn.Linear(layer_size, layer_size),    #h1
+            activation,
+            nn.Linear(layer_size,latent_dim)  # latent layer
+        )
+
+        self.decoder = nn.Sequential(
+            nn.Linear(latent_dim, layer_size),  #input layer
+            activation,
+            nn.Linear(layer_size, layer_size),   #h1
+            activation,
+            nn.Linear(layer_size, layer_size),    #h1
+            activation,
+            nn.Linear(layer_size, layer_size),    #h1
+            activation,
+            nn.Linear(layer_size, dx*dy),  # latent layer
+            activation
+        )
+
+    def forward(self, x):
+        
         encoded = self.encoder(x)
         decoded = self.decoder(encoded)
         return decoded

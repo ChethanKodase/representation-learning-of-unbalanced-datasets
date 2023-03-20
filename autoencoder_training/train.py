@@ -5,11 +5,11 @@ import torch
 import matplotlib.pyplot as plt
 import os
 
-from models import AE, CNN_AE_fmnist
+from models import AE, CNN_AE_fmnist, Autoencoder_linear_contra_fmnist
 from tqdm import tqdm 
 
-from loss_functions import jacobian_regularized_loss
-
+from loss_functions import jacobian_regularized_loss, contra_loss_function
+from torch.autograd import Variable
 
 path_models = './saved_models/'
 path_plots = './saved_plots/'
@@ -165,4 +165,46 @@ def train_CNN_AE_fmnist(no_epochs, train_batches, no_channels, layer_size, laten
     plt.plot(list(range(0,no_epochs)), loss_array)
     plt.xlabel("epoch")
     plt.ylabel("CNN-AE"+" loss")
+    plt.savefig(path_plots+'/loss'+name+'.png')
+
+
+
+
+def train_ContraAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, latent_dim, no_layers, activation, lr_contra, device,
+                 dataset, number_of_classes, majority_class_index, majority_class_frac, general_class_frac, set_batch_size, weight_decay, lam):
+
+
+    model = Autoencoder_linear_contra_fmnist(latent_dim, no_channels, dx, dy, layer_size, activation).to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr =lr_contra, weight_decay = weight_decay)
+
+    loss_array = []
+    for epoch in tqdm(range(no_epochs)):
+        epoch_loss_array = []
+        for inum, batch_x in enumerate(train_batches):
+            batch_x = batch_x.to(device)
+            batch_x_in = batch_x.reshape(-1, dx*dy).to(device)
+            #print('batch_x_in.shape', batch_x_in.shape)
+            #batch_x = batch_x.reshape(200, 1, 32, 32).to(device)
+            
+            batch_x_in = Variable(batch_x_in)
+            recon = model(batch_x_in).view(batch_x.size())
+            W = list(model.parameters())[8]
+            hidden_representation = model.encoder(batch_x_in)
+            loss_reconstruction, testcontraLoss = contra_loss_function(W, batch_x, recon, hidden_representation, lam)
+            epoch_loss_array.append(loss_reconstruction.item())
+
+            optimizer.zero_grad()
+            loss_reconstruction.backward()
+            optimizer.step()
+
+        avg_loss = sum(epoch_loss_array)/len(epoch_loss_array)
+        loss_array.append(avg_loss)
+        print("loss : ", avg_loss )
+
+    os.makedirs(path_models, exist_ok=True)
+    name = '_'+"ContraAE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_contra)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)+'_'+str(weight_decay)+'_'+str(lam)
+    torch.save(model.state_dict(), path_models+'/model'+name)
+    plt.plot(list(range(0,no_epochs)), loss_array)
+    plt.xlabel("epoch")
+    plt.ylabel("ContraAE"+" loss")
     plt.savefig(path_plots+'/loss'+name+'.png')

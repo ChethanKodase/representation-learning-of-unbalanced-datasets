@@ -16,7 +16,7 @@ from dataset_imbalancing import create_data_imbalance
 from models import AE, CNN_AE_fmnist
 from tqdm import tqdm 
 from activations import Sin
-from train import train_MLPAE, train_AEREG, train_CNN_AE_fmnist
+from train import train_MLPAE, train_AEREG, train_CNN_AE_fmnist, train_ContraAE
 from loss_functions import jacobian_regularized_loss
 
 torch.manual_seed(0)
@@ -99,7 +99,8 @@ weight_decay_cnn = 1e-5
 
 train_AE_MLP= False
 train_AE_REG = False
-train_CNN_AE = True
+train_CNN_AE = False
+train_Contra_AE = True
 
 if(train_AE_MLP):
     train_MLPAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, latent_dim, no_layers, activation, lr, device,
@@ -114,4 +115,14 @@ if(train_CNN_AE):
     train_CNN_AE_fmnist(no_epochs, train_batches, no_channels, layer_size, latent_dim, no_layers, cnn_activation, lr_cnn, device,
                     dataset, number_of_classes, majority_class_index, majority_class_frac, general_class_frac, set_batch_size, weight_decay_cnn)
 
-                    
+
+# Parameters specific to Contra AE
+lam_contra = 1e-2
+lr_contra = 1e-3
+weight_decay_contra = 1e-5
+activation_contra = torch.nn.ReLU()
+
+
+if(train_Contra_AE):
+    train_ContraAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, latent_dim, no_layers, activation, lr_contra, device,
+                    dataset, number_of_classes, majority_class_index, majority_class_frac, general_class_frac, set_batch_size, weight_decay_contra, lam_contra)

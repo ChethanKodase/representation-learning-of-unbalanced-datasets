@@ -1,5 +1,6 @@
 import torch
 
+from torch.autograd import Variable
 
 import numpy as np
 
@@ -53,3 +54,17 @@ def jacobian_regularized_loss(model_reg, batch_x, alpha, no_samples, deg_poly,  
     total_loss = (1.- alpha)*loss_reconstruction + alpha*loss_C1
 
     return total_loss, loss_reconstruction, loss_C1
+
+
+
+
+def contra_loss_function(W, x, recons_x, h, lam):
+
+    mseLoss_nn = torch.nn.MSELoss()
+    mse_loss = torch.nn.BCELoss(size_average = False)
+    mse = mseLoss_nn(recons_x, x)
+    dh = h * (1 - h) 
+    w_sum = torch.sum(Variable(W)**2, dim=1)
+    w_sum = w_sum.unsqueeze(1) 
+    contractive_loss = torch.sum(torch.mm(dh**2, w_sum), 0)
+    return mse + contractive_loss.mul_(lam), contractive_loss.mul_(lam)
