@@ -4,6 +4,8 @@ from torch.autograd import Variable
 
 import numpy as np
 
+import torch.nn.functional as F
+
 
 def sampleLegendreNodes(batch_size, latent_dim, points, n):
     Gamma = np.random.randint(low=0, high=n, size=(latent_dim, batch_size))
@@ -68,3 +70,12 @@ def contra_loss_function(W, x, recons_x, h, lam):
     w_sum = w_sum.unsqueeze(1) 
     contractive_loss = torch.sum(torch.mm(dh**2, w_sum), 0)
     return mse + contractive_loss.mul_(lam), contractive_loss.mul_(lam)
+
+
+def vae_loss_fn(recon_x, x, mu, logvar):
+
+    BCE = F.binary_cross_entropy(recon_x, x, size_average=False)
+    #BCE = torch.nn.MSELoss()(recon_x, x)
+    KLD = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
+
+    return BCE + KLD, BCE, KLD

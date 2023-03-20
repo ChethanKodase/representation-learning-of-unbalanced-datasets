@@ -5,11 +5,12 @@ import torch
 import matplotlib.pyplot as plt
 import os
 
-from models import AE, CNN_AE_fmnist, Autoencoder_linear_contra_fmnist
+from models import AE, CNN_AE_fmnist, Autoencoder_linear_contra_fmnist, MLP_VAE_fmnist
 from tqdm import tqdm 
 
-from loss_functions import jacobian_regularized_loss, contra_loss_function
+from loss_functions import jacobian_regularized_loss, contra_loss_function, vae_loss_fn
 from torch.autograd import Variable
+
 
 path_models = './saved_models/'
 path_plots = './saved_plots/'
@@ -183,8 +184,6 @@ def train_ContraAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, la
         for inum, batch_x in enumerate(train_batches):
             batch_x = batch_x.to(device)
             batch_x_in = batch_x.reshape(-1, dx*dy).to(device)
-            #print('batch_x_in.shape', batch_x_in.shape)
-            #batch_x = batch_x.reshape(200, 1, 32, 32).to(device)
             
             batch_x_in = Variable(batch_x_in)
             recon = model(batch_x_in).view(batch_x.size())
@@ -207,4 +206,47 @@ def train_ContraAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, la
     plt.plot(list(range(0,no_epochs)), loss_array)
     plt.xlabel("epoch")
     plt.ylabel("ContraAE"+" loss")
+    plt.savefig(path_plots+'/loss'+name+'.png')
+
+
+
+def train_MLP_VAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, latent_dim, no_layers, activation, lr_mlpvae, device,
+                 dataset, number_of_classes, majority_class_index, majority_class_frac, general_class_frac, set_batch_size):
+
+
+    image_size = dx*dy
+    z_dim = latent_dim
+    no_layers = 3
+    layer_size = 100
+
+
+    model = MLP_VAE_fmnist( image_size, layer_size, z_dim, activation).to(device)
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr_mlpvae) 
+
+    loss_array = []
+    for epoch in tqdm(range(no_epochs)):
+        epoch_loss_array = []
+        for inum, batch_x in enumerate(train_batches):
+            images = batch_x.reshape(-1, 32*32)
+
+            recon_images, mu, logvar = model(images.to(device))
+
+            loss_reconstruction, bce, kld = vae_loss_fn(recon_images.to(device), images.to(device), mu.to(device), logvar.to(device))
+            epoch_loss_array.append(loss_reconstruction.item())
+            
+            optimizer.zero_grad()
+            loss_reconstruction.backward()
+            optimizer.step()
+
+        avg_loss = sum(epoch_loss_array)/len(epoch_loss_array)
+        loss_array.append(avg_loss)
+        print("loss : ", avg_loss )
+
+    os.makedirs(path_models, exist_ok=True)
+    name = '_'+"MLP-VAE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_mlpvae)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
+    torch.save(model.state_dict(), path_models+'/model'+name)
+    plt.plot(list(range(0,no_epochs)), loss_array)
+    plt.xlabel("epoch")
+    plt.ylabel("MLP-VAE"+" loss")
     plt.savefig(path_plots+'/loss'+name+'.png')

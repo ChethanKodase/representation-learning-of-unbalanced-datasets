@@ -16,7 +16,7 @@ from dataset_imbalancing import create_data_imbalance
 from models import AE, CNN_AE_fmnist
 from tqdm import tqdm 
 from activations import Sin
-from train import train_MLPAE, train_AEREG, train_CNN_AE_fmnist, train_ContraAE
+from train import train_MLPAE, train_AEREG, train_CNN_AE_fmnist, train_ContraAE, train_MLP_VAE
 from loss_functions import jacobian_regularized_loss
 
 torch.manual_seed(0)
@@ -90,17 +90,13 @@ if(reg_nodes_sampled == "chebyshev"):
     weights = np.polynomial.chebyshev.chebgauss(deg_poly)[1][::-1]
 
 
-# parameters specific to CNN-AE
-cnn_activation = torch.nn.ReLU()
-lr_cnn = 1e-3
-weight_decay_cnn = 1e-5
-
-
 
 train_AE_MLP= False
 train_AE_REG = False
 train_CNN_AE = False
-train_Contra_AE = True
+train_Contra_AE = False
+train_CNN_VAE = False
+train_MLPVAE= True
 
 if(train_AE_MLP):
     train_MLPAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, latent_dim, no_layers, activation, lr, device,
@@ -110,6 +106,11 @@ if(train_AE_REG):
     train_AEREG(no_epochs, train_batches, no_channels, dx, dy, layer_size, latent_dim, no_layers, activation, lr, device,
                     dataset, number_of_classes, majority_class_index, majority_class_frac, general_class_frac, set_batch_size, 
                     alpha, no_samples, deg_poly, points, reg_nodes_sampled)
+
+# parameters specific to CNN-AE
+cnn_activation = torch.nn.ReLU()
+lr_cnn = 1e-3
+weight_decay_cnn = 1e-5
 
 if(train_CNN_AE):
     train_CNN_AE_fmnist(no_epochs, train_batches, no_channels, layer_size, latent_dim, no_layers, cnn_activation, lr_cnn, device,
@@ -126,3 +127,13 @@ activation_contra = torch.nn.ReLU()
 if(train_Contra_AE):
     train_ContraAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, latent_dim, no_layers, activation, lr_contra, device,
                     dataset, number_of_classes, majority_class_index, majority_class_frac, general_class_frac, set_batch_size, weight_decay_contra, lam_contra)
+
+
+# Parameters specific to MLP-VAE
+lr_mlpvae = 1e-3
+activation_mlpvae = torch.nn.ReLU()
+
+if(train_MLPVAE):
+    train_MLP_VAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, latent_dim, no_layers, activation_mlpvae, lr_mlpvae, device,
+                    dataset, number_of_classes, majority_class_index, majority_class_frac, general_class_frac, set_batch_size)
+
