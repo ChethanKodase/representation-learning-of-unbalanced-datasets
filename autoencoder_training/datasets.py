@@ -74,6 +74,12 @@ def get_train_test_datasets_and_data_in_batches(unbalancing_train_fractions, unb
     imbalanced_train_dataset, imblcnd_shffld_train_lbls = create_data_imbalance(train_data, train_labels, unbalancing_train_fractions)
     imbalanced_test_dataset, imblcnd_shffld_test_lbls = create_data_imbalance(test_data, test_labels, unbalancing_test_fractions)
 
+    fix_size_train = set_batch_size* (imbalanced_train_dataset.shape[0]//set_batch_size)
+    fix_size_test = set_batch_size* (imbalanced_test_dataset.shape[0]//set_batch_size)
+    
+    imbalanced_train_dataset = imbalanced_train_dataset[:fix_size_train]
+    imbalanced_test_dataset = imbalanced_test_dataset[:fix_size_test]
+
     batched_imbalanced_train_dataset = imbalanced_train_dataset.reshape(imbalanced_train_dataset.shape[0]//set_batch_size, set_batch_size, no_channels, dx, dy )
     batched_imbalanced_test_dataset = imbalanced_test_dataset.reshape(imbalanced_test_dataset.shape[0]//set_batch_size, set_batch_size, no_channels, dx, dy )
 

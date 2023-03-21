@@ -29,14 +29,18 @@ classes = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shi
 class_labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 majority_class_index = 9   # set which is the ,majority class
-majority_class_frac = 0.9  
+majority_class_frac = 0.1
 general_class_frac = 0.1
 
 
 number_of_classes =len(class_labels)
 train_class_fracs = [general_class_frac for i in range(number_of_classes)]
 train_class_fracs[majority_class_index] = majority_class_frac
-test_class_fracs = [general_class_frac for i in range(10)]
+
+
+general_class_frac_in_test = 0.2
+test_class_fracs = [general_class_frac for i in range(number_of_classes)]
+test_class_fracs[majority_class_index] = 0.2
 
 
 print('train_class_fracs', train_class_fracs )
@@ -53,7 +57,7 @@ get_dataset_class_stats(train_class_fracs, test_class_fracs, class_labels, datas
 
 # Common hyper parameters
 layer_size = 100
-latent_dim = 4
+latent_dim = 10
 no_layers = 3
 no_epochs = 100
 inp_dim = [no_channels, dx, dy]
@@ -170,16 +174,36 @@ def model_cnnvae(batch_x):
 
 test_samples = test_batches.reshape(test_batches.shape[0]*test_batches.shape[1], no_channels, dx, dy).to(device)
 
-reconstructions = model_cnnvae(test_samples).view(test_samples.size())
-reconstructions = reconstructions[:50]
+reconstructions_mlpae = model_mlpae(test_samples).view(test_samples.size())
+reconstructions_aereg = model_aereg(test_samples).view(test_samples.size())
+reconstructions_cnnae = model_cnnae(test_samples).view(test_samples.size())
+reconstructions_contra = model_contra(test_samples).view(test_samples.size())
+reconstructions_mlpvae = model_mlpvae(test_samples).view(test_samples.size())
+reconstructions_cnnvae = model_cnnvae(test_samples).view(test_samples.size())
+#reconstructions = reconstructions[:50]
 
-print('reconstruction.shape', reconstructions.shape)
+def get_perturbed_samples(test_samples, proz):
+    perturbed_samples = torch.tensor([])
+    for i in range(len(test_samples)):
+        orig = test_samples[i].cpu().detach().numpy()
+
+        noise_to_add = np.random.rand(no_channels,dx, dy)*(orig.max()-orig.min())*proz
+        perturbed_im = np.add(orig,noise_to_add)
+        perturbed_im = torch.tensor(perturbed_im)
+        perturbed_samples = torch.cat((perturbed_samples, perturbed_im),0)
+    return perturbed_samples.unsqueeze(1)
 
 
-for i in range(len(reconstructions)):
-    plt.imshow(reconstructions[i][0].cpu().detach())
+perturbed_samples = get_perturbed_samples(test_samples, 0.5)
+
+perturbed_samples = perturbed_samples[:50]
+
+print('perturbed_samples.shape', perturbed_samples.shape)
+
+'''for i in range(len(perturbed_samples)):
+    plt.imshow(perturbed_samples[i][0].cpu().detach())
     plt.savefig('/home/ramana44/representation-learning-of-unbalanced-datasets/experiments/rec'+str(i)+'.png')
-    plt.close()
+    plt.close()'''
 
 from skimage.metrics import structural_similarity as ssim
 from skimage.metrics import peak_signal_noise_ratio as psnr
@@ -187,6 +211,61 @@ from skimage.metrics import peak_signal_noise_ratio as psnr
 from matplotlib.colors import Normalize
 
 
-test_samples_normal = Normalize()(test_samples)
-testImage_normal = Normalize()(test_samples)
+def get_batch_psnr_ssim_lists(test_samples, reconstructions):
+    all_psnr = []
+    all_ssim = []
+    for i in range(len(test_samples)):
+        test_samples = test_samples.cpu().detach()
+        reconstructions = reconstructions.cpu().detach()
+
+        test_sample_normal = Normalize()(test_samples[i][0])
+        reconstruction_normal = Normalize()(reconstructions[i][0])
+
+        im_psnr = max(psnr(test_sample_normal, reconstruction_normal, data_range=1.), 0)
+        im_ssim = max(ssim(test_sample_normal, reconstruction_normal, data_range=1.), 0)
+
+        all_psnr.append(im_psnr)
+        all_ssim.append(im_ssim)
+
+    return all_psnr, all_ssim
+
+psnr_list_mlpae, ssim_list_mlpae =  get_batch_psnr_ssim_lists(test_samples, reconstructions_mlpae)
+psnr_list_aereg, ssim_list_aereg =  get_batch_psnr_ssim_lists(test_samples, reconstructions_aereg)
+psnr_list_cnnae, ssim_list_cnnae =  get_batch_psnr_ssim_lists(test_samples, reconstructions_cnnae)
+psnr_list_contra, ssim_list_contra =  get_batch_psnr_ssim_lists(test_samples, reconstructions_contra)
+psnr_list_mlpvae, ssim_list_mlpvae =  get_batch_psnr_ssim_lists(test_samples, reconstructions_mlpvae)
+psnr_list_cnnvae, ssim_list_cnnvae =  get_batch_psnr_ssim_lists(test_samples, reconstructions_cnnvae)
+
+
+import matplotlib.pyplot as plt
+import numpy as np
+print('SSIM of reconstruction on test data')
+all_model_names = ['MLP-AE', 'AE-REG', 'CNN-AE', 'ContraAE', 'MLP-VAE', 'CNN-VAE']
+ssims = [ssim_list_mlpae, ssim_list_aereg, ssim_list_cnnae, ssim_list_contra, ssim_list_mlpvae, ssim_list_cnnvae]
+fig1, ax1 = plt.subplots()
+ax1.boxplot(list(ssims))
+ax1.set_ylabel('SSIM', fontsize=10)
+ax1.set_ylim([0,1])
+plt.xticks([1, 2, 3, 4, 5, 6], [str(s) for s in all_model_names], fontsize=10)
+plt.yticks(fontsize=10)
+plt.savefig('./results_plotting/box_plots/SSIM_directReconOfTestData_Lat_dim'+str(latent_dim)+'_maj_class_frac_'+str(majority_class_frac)+'_gen_class_frac'+str(general_class_frac)+'.png')
+plt.show()
+
+
+import matplotlib.pyplot as plt
+import numpy as np
+print('PSNR of reconstruction on test data')
+all_model_names = ['MLP-AE', 'AE-REG', 'CNN-AE', 'ContraAE', 'MLP-VAE', 'CNN-VAE']
+ssims = [psnr_list_mlpae, psnr_list_aereg, psnr_list_cnnae, psnr_list_contra, psnr_list_mlpvae, psnr_list_cnnvae]
+fig1, ax1 = plt.subplots()
+ax1.boxplot(list(ssims))
+ax1.set_ylabel('PSNR', fontsize=10)
+ax1.set_ylim([0,30])
+plt.xticks([1, 2, 3, 4, 5, 6], [str(s) for s in all_model_names], fontsize=10)
+plt.yticks(fontsize=10)
+plt.savefig('./results_plotting/box_plots/PSNR_directReconOfTestData_Lat_dim'+str(latent_dim)+'_maj_class_frac_'+str(majority_class_frac)+'_gen_class_frac'+str(general_class_frac)+'.png')
+plt.show()
+
+
+
 

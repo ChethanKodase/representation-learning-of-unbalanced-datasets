@@ -26,8 +26,8 @@ classes = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shi
 class_labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 majority_class_index = 9   # set which is the ,majority class
-majority_class_frac = 0.1  
-general_class_frac = 0.1
+majority_class_frac = 0.4  
+general_class_frac = 0.4
 
 
 number_of_classes =len(class_labels)
