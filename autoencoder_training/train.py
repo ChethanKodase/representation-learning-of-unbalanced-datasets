@@ -5,7 +5,7 @@ import torch
 import matplotlib.pyplot as plt
 import os
 
-from models import AE, CNN_AE_fmnist, Autoencoder_linear_contra_fmnist, MLP_VAE_fmnist
+from models import AE, CNN_AE_fmnist, Autoencoder_linear_contra_fmnist, MLP_VAE_fmnist, CNN_VAE_fmnist
 from tqdm import tqdm 
 
 from loss_functions import jacobian_regularized_loss, contra_loss_function, vae_loss_fn
@@ -249,4 +249,40 @@ def train_MLP_VAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, lat
     plt.plot(list(range(0,no_epochs)), loss_array)
     plt.xlabel("epoch")
     plt.ylabel("MLP-VAE"+" loss")
+    plt.savefig(path_plots+'/loss'+name+'.png')
+
+
+
+def train_CNN_VAE_fmnist(no_epochs, train_batches, no_channels, layer_size, latent_dim, no_layers, activation, lr_cnn_vae, device,
+                 dataset, number_of_classes, majority_class_index, majority_class_frac, general_class_frac, set_batch_size, h_dim):
+
+    model = CNN_VAE_fmnist(no_channels, no_layers, activation, h_dim, z_dim=latent_dim).to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr_cnn_vae) 
+
+    loss_array = []
+    for epoch in tqdm(range(no_epochs)):
+        epoch_loss_array = []
+        for inum, batch_x in enumerate(train_batches):
+
+            recon_images, mu, logvar = model(batch_x.to(device))
+            loss_reconstruction, bce, kld = vae_loss_fn(recon_images.to(device), batch_x.to(device), mu.to(device), logvar.to(device))
+
+            optimizer.zero_grad()
+            loss_reconstruction.backward()
+            optimizer.step()
+            epoch_loss_array.append(loss_reconstruction.item())
+
+
+        avg_loss = sum(epoch_loss_array)/len(epoch_loss_array)
+        loss_array.append(avg_loss)
+
+        print("loss : ", avg_loss )
+
+    os.makedirs(path_models, exist_ok=True)
+    name = '_'+"CNN-VAE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_cnn_vae)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
+    torch.save(model.state_dict(), path_models+'/model'+name)
+    
+    plt.plot(list(range(0,no_epochs)), loss_array)
+    plt.xlabel("epoch")
+    plt.ylabel("CNN-VAE"+" loss")
     plt.savefig(path_plots+'/loss'+name+'.png')

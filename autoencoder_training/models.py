@@ -205,3 +205,59 @@ class MLP_VAE_fmnist(nn.Module):
         z = self.fc3(z)
         #print('z.shape', z.shape)
         return self.decoder(z), mu, logvar
+
+
+
+class CNN_VAE_fmnist(nn.Module):
+    def __init__(self, image_channels, no_layers, activation, h_dim, z_dim):
+        super(CNN_VAE_fmnist, self).__init__()
+        self.encoder = nn.Sequential(
+            nn.Conv2d(image_channels, 16, 3, stride=2, padding=1),  #N, 16, 16, 16
+            activation,
+            nn.Conv2d(16, 32, 3, stride=2, padding=1),   #N, 32, 8, 8
+            activation,
+            nn.Conv2d(32, 16, 8, stride=2, padding=1),    #N, 64, 2, 2
+            activation,
+            nn.Conv2d(16, 8, 2, stride=2, padding=1),    #N, 64, 1, 1
+            nn.Flatten(1,-1),
+
+        )
+        
+        self.fc1 = nn.Linear(h_dim, z_dim)
+        self.fc2 = nn.Linear(h_dim, z_dim)
+        self.fc3 = nn.Linear(z_dim, h_dim)
+        
+        self.decoder = nn.Sequential(
+            
+            nn.Unflatten(1, (8, 2, 2)),
+            nn.ConvTranspose2d(8, 16, 2, stride=2, padding=1),  #N, 32, 8, 8
+            activation,
+            nn.ConvTranspose2d(16, 32, 8, stride=2, padding=1),  #N, 32, 8, 8
+            activation,
+            nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1),   #N, 16, 16, 16
+            activation,
+            nn.ConvTranspose2d(16, image_channels, 3, stride=2, padding=1, output_padding=1),   #N, 1, 32, 32
+            nn.Sigmoid()
+        )
+        
+    def reparameterize(self, mu, logvar):
+        std = logvar.mul(0.5).exp_()
+        # return torch.normal(mu, std)
+        esp = torch.randn(*mu.size()).to(device)
+        z = mu + std * esp
+        return z.to(device)
+    
+    def bottleneck(self, h):
+        mu, logvar = self.fc1(h), self.fc2(h)
+        z = self.reparameterize(mu.to(device), logvar.to(device))
+        return z, mu, logvar
+        
+    def representation(self, x):
+        return self.bottleneck(self.encoder(x))[0]
+
+    def forward(self, x):
+        h = self.encoder(x)
+        z, mu, logvar = self.bottleneck(h.to(device))
+        z = self.fc3(z)
+        #print('z.shape', z.shape)
+        return self.decoder(z), mu, logvar
