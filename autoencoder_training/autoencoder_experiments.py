@@ -1,3 +1,5 @@
+
+
 import torch
 import torchvision
 from torchvision import transforms, datasets
@@ -98,9 +100,9 @@ activation_cnn_vae = torch.nn.ReLU()
 train_AE_MLP= False
 train_AE_REG = False
 train_CNN_AE = False
-train_Contra_AE = False
+train_Contra_AE = True
 train_MLPVAE= False
-train_CNN_VAE = True
+train_CNN_VAE = False
 
 if(train_AE_MLP):
     train_MLPAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, latent_dim, no_layers, activation, lr, device,
@@ -116,7 +118,7 @@ if(train_CNN_AE):
                     dataset, number_of_classes, majority_class_index, majority_class_frac, general_class_frac, set_batch_size, weight_decay_cnn)
 
 if(train_Contra_AE):
-    train_ContraAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, latent_dim, no_layers, activation, lr_contra, device,
+    train_ContraAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, latent_dim, no_layers, activation_contra, lr_contra, device,
                     dataset, number_of_classes, majority_class_index, majority_class_frac, general_class_frac, set_batch_size, weight_decay_contra, lam_contra)
 
 
