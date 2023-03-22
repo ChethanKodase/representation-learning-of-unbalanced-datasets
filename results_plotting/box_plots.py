@@ -29,8 +29,8 @@ classes = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shi
 class_labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 majority_class_index = 9   # set which is the ,majority class
-majority_class_frac = 0.1
-general_class_frac = 0.1
+majority_class_frac = 0.9
+general_class_frac = 0.6
 
 
 number_of_classes =len(class_labels)
@@ -39,7 +39,7 @@ train_class_fracs[majority_class_index] = majority_class_frac
 
 
 general_class_frac_in_test = 0.2
-test_class_fracs = [general_class_frac for i in range(number_of_classes)]
+test_class_fracs = [general_class_frac_in_test for i in range(number_of_classes)]
 test_class_fracs[majority_class_index] = 0.2
 
 
@@ -49,6 +49,8 @@ print('test_class_fracs', test_class_fracs )
 set_batch_size = 200
 train_batches, test_batches, no_channels, dx, dy = get_train_test_datasets_and_data_in_batches(train_class_fracs, test_class_fracs, set_batch_size, dataset = "FashionMNIST")
 
+perturb_test_data = True
+test_data_noise_percent = 0.7
 
 # To check the population of different classes in train and test datasets
 dataset = "FashionMNIST"
@@ -117,7 +119,7 @@ activation_cnn_vae = torch.nn.ReLU()
 
 # loading MLPAE
 model_mlpae = AE(inp_dim, layer_size, latent_dim, no_layers, activation_mlpae).to(device) # baseline autoencoder
-name_mlpae = '_'+"MLP-AE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_mlpae)+'_'+str(activation_mlpae)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
+name_mlpae = '_'+"MLP-AE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_mlpae)+'_'+str(activation_mlpae)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
 model_mlpae.load_state_dict(torch.load(path_models+'/model'+name_mlpae, map_location=device))
 ########################################################################################################################
 
@@ -125,7 +127,7 @@ model_mlpae.load_state_dict(torch.load(path_models+'/model'+name_mlpae, map_loca
 # Loading AE-REG
 ########################################################################################################################
 model_aereg = AE(inp_dim, layer_size, latent_dim, no_layers, activation_aereg).to(device) # baseline autoencoder
-name_aereg = '_'+"AE-REG"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+ str(reg_nodes_sampled)+'_'+ str(deg_poly)+'_'+ str(alpha)+'_'+ str(no_samples)+'_'+str(lr_aereg)+'_'+str(activation_aereg)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
+name_aereg = '_'+"AE-REG"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+ str(reg_nodes_sampled)+'_'+ str(deg_poly)+'_'+ str(alpha)+'_'+ str(no_samples)+'_'+str(lr_aereg)+'_'+str(activation_aereg)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
 model_aereg.load_state_dict(torch.load(path_models+'/model'+name_aereg, map_location=device))
 ########################################################################################################################
 
@@ -133,14 +135,14 @@ model_aereg.load_state_dict(torch.load(path_models+'/model'+name_aereg, map_loca
 # Loading CNN-AE
 ########################################################################################################################
 model_cnnae = CNN_AE_fmnist(latent_dim, no_channels, activation_cnn).to(device)
-name_cnnae = '_'+"CNN-AE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_cnn)+'_'+str(activation_cnn)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)+'_'+str(weight_decay_cnn)
+name_cnnae = '_'+"CNN-AE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_cnn)+'_'+str(activation_cnn)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)+'_'+str(weight_decay_cnn)
 model_cnnae.load_state_dict(torch.load(path_models+'/model'+name_cnnae, map_location=device))
 ########################################################################################################################
 
 # Loading ContraAE
 ########################################################################################################################
 model_contra_ = Autoencoder_linear_contra_fmnist(latent_dim, no_channels, dx, dy, layer_size, activation_contra).to(device)
-name_contra = '_'+"ContraAE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_contra)+'_'+str(activation_contra)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)+'_'+str(weight_decay_contra)+'_'+str(lam_contra)
+name_contra = '_'+"ContraAE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_contra)+'_'+str(activation_contra)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)+'_'+str(weight_decay_contra)+'_'+str(lam_contra)
 model_contra_.load_state_dict(torch.load(path_models+'/model'+name_contra, map_location=device))
 def model_contra(batch_x):
     batch_x_in = batch_x.reshape(-1, dx*dy).to(device)    
@@ -150,7 +152,7 @@ def model_contra(batch_x):
 # Loading MLP-VAE
 ########################################################################################################################
 model_mlpvae_ = MLP_VAE_fmnist(dx*dy, layer_size, latent_dim, activation_mlpvae).to(device)
-name_mlpvae = '_'+"MLP-VAE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_mlpvae)+'_'+str(activation_mlpvae)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
+name_mlpvae = '_'+"MLP-VAE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_mlpvae)+'_'+str(activation_mlpvae)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
 model_mlpvae_.load_state_dict(torch.load(path_models+'/model'+name_mlpvae, map_location=device))
 def model_mlpvae(batch_x):
     batch_x_in = batch_x.reshape(-1, dx*dy).to(device)    
@@ -162,7 +164,7 @@ def model_mlpvae(batch_x):
 ########################################################################################################################
 
 model_cnnvae_ = CNN_VAE_fmnist(no_channels, no_layers, activation_cnn_vae, h_dim_cnn_vae, z_dim=latent_dim).to(device)
-name_cnnvae = '_'+"CNN-VAE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_cnn_vae)+'_'+str(activation_cnn_vae)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
+name_cnnvae = '_'+"CNN-VAE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_cnn_vae)+'_'+str(activation_cnn_vae)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
 model_cnnvae_.load_state_dict(torch.load(path_models+'/model'+name_cnnvae, map_location=device))
 
 def model_cnnvae(batch_x):
@@ -174,13 +176,8 @@ def model_cnnvae(batch_x):
 
 test_samples = test_batches.reshape(test_batches.shape[0]*test_batches.shape[1], no_channels, dx, dy).to(device)
 
-reconstructions_mlpae = model_mlpae(test_samples).view(test_samples.size())
-reconstructions_aereg = model_aereg(test_samples).view(test_samples.size())
-reconstructions_cnnae = model_cnnae(test_samples).view(test_samples.size())
-reconstructions_contra = model_contra(test_samples).view(test_samples.size())
-reconstructions_mlpvae = model_mlpvae(test_samples).view(test_samples.size())
-reconstructions_cnnvae = model_cnnvae(test_samples).view(test_samples.size())
-#reconstructions = reconstructions[:50]
+print('test_samples.shape', test_samples.shape)
+
 
 def get_perturbed_samples(test_samples, proz):
     perturbed_samples = torch.tensor([])
@@ -191,14 +188,25 @@ def get_perturbed_samples(test_samples, proz):
         perturbed_im = np.add(orig,noise_to_add)
         perturbed_im = torch.tensor(perturbed_im)
         perturbed_samples = torch.cat((perturbed_samples, perturbed_im),0)
-    return perturbed_samples.unsqueeze(1)
+    return perturbed_samples.unsqueeze(1).float().to(device)
+
+if(perturb_test_data):
+    test_samples = get_perturbed_samples(test_samples, test_data_noise_percent)
+
+#perturbed_samples = perturbed_samples[:50]
+
+print('perturbed_samples.shape', test_samples.shape)
 
 
-perturbed_samples = get_perturbed_samples(test_samples, 0.5)
+reconstructions_mlpae = model_mlpae(test_samples).view(test_samples.size())
+reconstructions_aereg = model_aereg(test_samples).view(test_samples.size())
+reconstructions_cnnae = model_cnnae(test_samples).view(test_samples.size())
+reconstructions_contra = model_contra(test_samples).view(test_samples.size())
+reconstructions_mlpvae = model_mlpvae(test_samples).view(test_samples.size())
+reconstructions_cnnvae = model_cnnvae(test_samples).view(test_samples.size())
+#reconstructions = reconstructions[:50]
 
-perturbed_samples = perturbed_samples[:50]
 
-print('perturbed_samples.shape', perturbed_samples.shape)
 
 '''for i in range(len(perturbed_samples)):
     plt.imshow(perturbed_samples[i][0].cpu().detach())
@@ -248,7 +256,7 @@ ax1.set_ylabel('SSIM', fontsize=10)
 ax1.set_ylim([0,1])
 plt.xticks([1, 2, 3, 4, 5, 6], [str(s) for s in all_model_names], fontsize=10)
 plt.yticks(fontsize=10)
-plt.savefig('./results_plotting/box_plots/SSIM_directReconOfTestData_Lat_dim'+str(latent_dim)+'_maj_class_frac_'+str(majority_class_frac)+'_gen_class_frac'+str(general_class_frac)+'.png')
+plt.savefig('./results_plotting/box_plots/SSIM_directReconOfTestData_Lat_dim'+str(latent_dim)+'_maj_class_frac_'+str(majority_class_frac)+'_gen_class_frac'+str(general_class_frac)+'noise_perc'+str(test_data_noise_percent)+'_.png')
 plt.show()
 
 
@@ -263,7 +271,7 @@ ax1.set_ylabel('PSNR', fontsize=10)
 ax1.set_ylim([0,30])
 plt.xticks([1, 2, 3, 4, 5, 6], [str(s) for s in all_model_names], fontsize=10)
 plt.yticks(fontsize=10)
-plt.savefig('./results_plotting/box_plots/PSNR_directReconOfTestData_Lat_dim'+str(latent_dim)+'_maj_class_frac_'+str(majority_class_frac)+'_gen_class_frac'+str(general_class_frac)+'.png')
+plt.savefig('./results_plotting/box_plots/PSNR_directReconOfTestData_Lat_dim'+str(latent_dim)+'_maj_class_frac_'+str(majority_class_frac)+'_gen_class_frac'+str(general_class_frac)+'noise_perc'+str(test_data_noise_percent)+'_.png')
 plt.show()
 
 

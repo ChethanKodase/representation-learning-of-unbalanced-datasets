@@ -44,7 +44,7 @@ def train_MLPAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, laten
         print("loss : ", avg_loss )
 
     os.makedirs(path_models, exist_ok=True)
-    name = '_'+"MLP-AE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
+    name = '_'+"MLP-AE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
     torch.save(model.state_dict(), path_models+'/model'+name)
     
     plt.plot(list(range(0,no_epochs)), loss_array)
@@ -105,7 +105,7 @@ def train_AEREG(no_epochs, train_batches, no_channels, dx, dy, layer_size, laten
         print("jacobian regularization loss : ", avg_reg_loss )
 
     os.makedirs(path_models, exist_ok=True)
-    name = '_'+"AE-REG"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+ str(reg_nodes_sampled)+'_'+ str(deg_poly)+'_'+ str(alpha)+'_'+ str(no_samples)+'_'+str(lr)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
+    name = '_'+"AE-REG"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+ str(reg_nodes_sampled)+'_'+ str(deg_poly)+'_'+ str(alpha)+'_'+ str(no_samples)+'_'+str(lr)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
     torch.save(model.state_dict(), path_models+'/model'+name)
     
     plt.plot(list(range(0,no_epochs)), tot_loss_array)
@@ -160,7 +160,7 @@ def train_CNN_AE_fmnist(no_epochs, train_batches, no_channels, layer_size, laten
         print("loss : ", avg_loss )
 
     os.makedirs(path_models, exist_ok=True)
-    name = '_'+"CNN-AE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_cnn)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)+'_'+str(weight_decay)
+    name = '_'+"CNN-AE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_cnn)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)+'_'+str(weight_decay)
     torch.save(model.state_dict(), path_models+'/model'+name)
     
     plt.plot(list(range(0,no_epochs)), loss_array)
@@ -201,7 +201,7 @@ def train_ContraAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, la
         print("loss : ", avg_loss )
 
     os.makedirs(path_models, exist_ok=True)
-    name = '_'+"ContraAE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_contra)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)+'_'+str(weight_decay)+'_'+str(lam)
+    name = '_'+"ContraAE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_contra)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)+'_'+str(weight_decay)+'_'+str(lam)
     torch.save(model.state_dict(), path_models+'/model'+name)
     plt.plot(list(range(0,no_epochs)), loss_array)
     plt.xlabel("epoch")
@@ -244,7 +244,7 @@ def train_MLP_VAE(no_epochs, train_batches, no_channels, dx, dy, layer_size, lat
         print("loss : ", avg_loss )
 
     os.makedirs(path_models, exist_ok=True)
-    name = '_'+"MLP-VAE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_mlpvae)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
+    name = '_'+"MLP-VAE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_mlpvae)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
     torch.save(model.state_dict(), path_models+'/model'+name)
     plt.plot(list(range(0,no_epochs)), loss_array)
     plt.xlabel("epoch")
@@ -279,7 +279,7 @@ def train_CNN_VAE_fmnist(no_epochs, train_batches, no_channels, layer_size, late
         print("loss : ", avg_loss )
 
     os.makedirs(path_models, exist_ok=True)
-    name = '_'+"CNN-VAE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_cnn_vae)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(general_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
+    name = '_'+"CNN-VAE"+'_'+str(no_layers)+'_'+str(layer_size)+'_'+str(latent_dim)+'_'+str(lr_cnn_vae)+'_'+str(activation)+'_'+str(dataset)+'_'+str(number_of_classes)+'_'+str(majority_class_index)+'_'+str(majority_class_frac)+'_'+str(no_epochs)+'_'+str(set_batch_size)
     torch.save(model.state_dict(), path_models+'/model'+name)
     
     plt.plot(list(range(0,no_epochs)), loss_array)

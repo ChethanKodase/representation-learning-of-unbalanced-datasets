@@ -25,15 +25,28 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 classes = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
 class_labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
+# total size of each class 6000 in training set
+# worst / maximum bias that you can inflict on the dataset : 6000 images
+# images in the majority class and 0 images in rest of the classes
+
+# So total dataset size would be 6000,
+# The training data amount is 6,000/60,000=0 .1
+
+
 majority_class_index = 9   # set which is the ,majority class
-majority_class_frac = 0.1  
-general_class_frac = 0.1
+majority_class_frac = 0.9  
+general_class_frac = (1.0 - majority_class_frac)/len(class_labels)
 
 
 number_of_classes =len(class_labels)
 train_class_fracs = [general_class_frac for i in range(number_of_classes)]
 train_class_fracs[majority_class_index] = majority_class_frac
 test_class_fracs = [general_class_frac for i in range(10)]
+
+
+general_class_frac_in_test = 0.1
+test_class_fracs = [general_class_frac_in_test for i in range(number_of_classes)]
+#test_class_fracs[majority_class_index] = 0.2 # no bias in the test data
 
 print('train_class_fracs', train_class_fracs )
 print('test_class_fracs', test_class_fracs )
