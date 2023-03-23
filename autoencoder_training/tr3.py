@@ -62,7 +62,7 @@ get_dataset_class_stats(train_class_fracs, test_class_fracs, class_labels, datas
 
 # Common hyper parameters
 layer_size = 100
-latent_dim = 10
+latent_dim = 4
 no_layers = 3
 activation = Sin()
 no_epochs = 100

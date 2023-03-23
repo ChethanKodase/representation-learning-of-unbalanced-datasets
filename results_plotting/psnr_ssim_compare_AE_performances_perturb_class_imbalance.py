@@ -30,7 +30,12 @@ classes = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shi
 class_labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 majority_class_index = 9   # set which is the ,majority class
-majority_class_frac = 0.9
+majority_class_frac = 0.1
+
+#majority_class_fracs = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+
+#for majority_class_frac in majority_class_fracs:
+
 general_class_frac = (1.0 - majority_class_frac)/(len(class_labels)-1)
 
 
@@ -52,7 +57,7 @@ set_batch_size = 200
 train_batches, test_batches, no_channels, dx, dy = get_train_test_datasets_and_data_in_batches(train_class_fracs, test_class_fracs, set_batch_size, dataset)
 
 perturb_test_data = True
-test_data_noise_percent = 0.1
+test_data_noise_percent = 0.7
 
 test_samples = test_batches.reshape(test_batches.shape[0]*test_batches.shape[1], no_channels, dx, dy).to(device)
 
@@ -69,7 +74,7 @@ get_dataset_class_stats(train_class_fracs, test_class_fracs, class_labels, datas
 
 # Common hyper parameters
 layer_size = 100
-latent_dim = 10
+latent_dim = 4
 no_layers = 3
 no_epochs = 100
 inp_dim = [no_channels, dx, dy]
