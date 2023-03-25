@@ -30,7 +30,12 @@ classes = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shi
 class_labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 majority_class_index = 9   # set which is the ,majority class
-majority_class_frac = 0.1
+#majority_class_frac = 0.1
+
+test_majority_class_index = 6
+test_majority_class_frac = 1.0
+general_class_frac_in_test = (1.0 - test_majority_class_frac)/(len(class_labels)-1)
+
 
 majority_class_fracs = [0.1, 0.2, 0.3, 0.4, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.95, 0.97, 0.98, 0.985, 0.99, 0.995]
 
@@ -60,9 +65,9 @@ for majority_class_frac in majority_class_fracs:
     train_class_fracs[majority_class_index] = majority_class_frac
 
 
-    general_class_frac_in_test = 0.1
+
     test_class_fracs = [general_class_frac_in_test for i in range(number_of_classes)]
-    #test_class_fracs[majority_class_index] = 0.2 # no bias in the test data
+    test_class_fracs[test_majority_class_index] = test_majority_class_frac 
 
 
     print('train_class_fracs', train_class_fracs )
@@ -72,7 +77,7 @@ for majority_class_frac in majority_class_fracs:
     set_batch_size = 200
     train_batches, test_batches, no_channels, dx, dy = get_train_test_datasets_and_data_in_batches(train_class_fracs, test_class_fracs, set_batch_size, dataset)
 
-    perturb_test_data = True
+    perturb_test_data = False
     test_data_noise_percent = 0.5
 
     test_samples = test_batches.reshape(test_batches.shape[0]*test_batches.shape[1], no_channels, dx, dy).to(device)
@@ -246,7 +251,7 @@ plt.plot(majority_class_fracs, psnr_list_avg_cnnvae_against_class_imbalances ,la
 plt.ylim(8, 20.0)
 plt.legend()
 plt.show()
-plt.savefig('./results_plotting/Avg_recon_qlty/psnr_avg_directReconOfTestData_Lat_dim'+str(latent_dim)+'_maj_class_frac_'+str(majority_class_frac)+'_gen_class_frac'+str(general_class_frac)+'noise_perc'+str(test_data_noise_percent)+'_.png')
+plt.savefig('./results_plotting/class_specific_avg_recon_quality/psnr_avg_Lat_dim'+str(latent_dim)+'_train_maj_class_'+str(majority_class_index)+'_train_maj_class_frac_'+str(majority_class_frac)+'_test_maj_class_'+str(test_majority_class_index)+'_test_maj_class_frac_'+str(test_majority_class_frac)+'_noise_perc_'+str(test_data_noise_percent)+'_.png')
 plt.close()
 
 
@@ -258,8 +263,8 @@ plt.plot(majority_class_fracs, ssim_list_avg_cnnae_against_class_imbalances ,lab
 plt.plot(majority_class_fracs, ssim_list_avg_contra_against_class_imbalances ,label = 'ContraAE')
 plt.plot(majority_class_fracs, ssim_list_avg_mlpvae_against_class_imbalances ,label = 'MLP-VAE')
 plt.plot(majority_class_fracs, ssim_list_avg_cnnvae_against_class_imbalances ,label = 'CNN-VAE')
-plt.ylim(0.1, 0.6)
+plt.ylim(0.1, 0.8)
 plt.legend()
 plt.show()
-plt.savefig('./results_plotting/Avg_recon_qlty/ssim_avg_directReconOfTestData_Lat_dim'+str(latent_dim)+'_maj_class_frac_'+str(majority_class_frac)+'_gen_class_frac'+str(general_class_frac)+'noise_perc'+str(test_data_noise_percent)+'_.png')
+plt.savefig('./results_plotting/class_specific_avg_recon_quality/ssim_avg_Lat_dim'+str(latent_dim)+'_train_maj_class_'+str(majority_class_index)+'_train_maj_class_frac_'+str(majority_class_frac)+'_test_maj_class_'+str(test_majority_class_index)+'_test_maj_class_frac_'+str(test_majority_class_frac)+'_noise_perc_'+str(test_data_noise_percent)+'_.png')
 plt.close()
