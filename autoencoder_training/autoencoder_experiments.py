@@ -34,7 +34,7 @@ class_labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
 majority_class_index = 9   # set which is the ,majority class
-majority_class_frac = 0.9  
+majority_class_frac = 0.9995  
 general_class_frac = (1.0 - majority_class_frac)/(len(class_labels)-1)
 
 
@@ -62,7 +62,7 @@ get_dataset_class_stats(train_class_fracs, test_class_fracs, class_labels, datas
 
 # Common hyper parameters
 layer_size = 100
-latent_dim = 10
+latent_dim = 4
 no_layers = 3
 activation = Sin()
 no_epochs = 100
