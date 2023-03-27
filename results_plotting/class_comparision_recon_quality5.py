@@ -72,7 +72,7 @@ for majority_class_frac in majority_class_fracs:
 
         #Check if you want perturbed inputs
         perturb_test_data = False
-        test_data_noise_percent = 0.7
+        test_data_noise_percent = 0.5
 
         print('train_class_fracs', train_class_fracs )
         print('test_class_fracs', test_class_fracs )
@@ -255,7 +255,7 @@ for majority_class_frac in majority_class_fracs:
     ax1.set_ylim([0,1])
     plt.xticks([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [str(s) for s in range(10)], fontsize=10)
     plt.yticks(fontsize=10)
-    plt.savefig('./results_plotting/class_comparision/MLP_VAE_SSIM_directReconOfTestData_Lat_dim'+str(latent_dim)+'_train_maj_class_'+str(majority_class_index)+'_train_maj_class_frac_'+str(majority_class_frac)+'_test_maj_class_'+str(test_majority_class_index)+'_test_maj_class_frac_'+str(test_majority_class_frac)+'_noise_perc_'+str(test_data_noise_percent)+'_.png')
+    plt.savefig('./results_plotting/class_comparision/AE_REG_SSIM_directReconOfTestData_Lat_dim'+str(latent_dim)+'_train_maj_class_'+str(majority_class_index)+'_train_maj_class_frac_'+str(majority_class_frac)+'_test_maj_class_'+str(test_majority_class_index)+'_test_maj_class_frac_'+str(test_majority_class_frac)+'_noise_perc_'+str(test_data_noise_percent)+'_.png')
     #plt.show()
     plt.close()
 
@@ -269,7 +269,7 @@ for majority_class_frac in majority_class_fracs:
     ax1.set_ylim([0,30])
     plt.xticks([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [str(s) for s in range(10)], fontsize=10)
     plt.yticks(fontsize=10)
-    plt.savefig('./results_plotting/class_comparision/MLP_VAE_PSNR_directReconOfTestData_Lat_dim'+str(latent_dim)+'_train_maj_class_'+str(majority_class_index)+'_train_maj_class_frac_'+str(majority_class_frac)+'_test_maj_class_'+str(test_majority_class_index)+'_test_maj_class_frac_'+str(test_majority_class_frac)+'_noise_perc_'+str(test_data_noise_percent)+'_.png')
+    plt.savefig('./results_plotting/class_comparision/AE_REG_PSNR_directReconOfTestData_Lat_dim'+str(latent_dim)+'_train_maj_class_'+str(majority_class_index)+'_train_maj_class_frac_'+str(majority_class_frac)+'_test_maj_class_'+str(test_majority_class_index)+'_test_maj_class_frac_'+str(test_majority_class_frac)+'_noise_perc_'+str(test_data_noise_percent)+'_.png')
     #plt.show()
     plt.close()
 
