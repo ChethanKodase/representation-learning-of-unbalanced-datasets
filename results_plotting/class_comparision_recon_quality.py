@@ -62,7 +62,7 @@ for test_majority_class_index in class_labels:
     train_CNN_VAE = False
 
     #Check if you want perturbed inputs
-    perturb_test_data = False
+    perturb_test_data = True
     test_data_noise_percent = 0.1
 
     print('train_class_fracs', train_class_fracs )

@@ -8,3 +8,10 @@ Results directory address : `./results_plotting/box_plots/class_imbalance_withou
 ### Experiment 2
 Average reconstruction qualities of all AEs against level of data imbalance
 Results : `/home/ramana44/representation-learning-of-unbalanced-datasets/results_plotting/Avg_recon_qlty`
+
+
+Notes: 
+
+When majority calss fraction of 0.998 is used, the majority class population is 5988 and sample size of rest of the classes is 1.
+
+for majority calss fraction of 0.9995, the autoencoders are trained only with majority class
