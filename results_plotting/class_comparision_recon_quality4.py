@@ -33,8 +33,6 @@ number_of_classes =len(class_labels)
 
 test_majority_class_index = 0
 
-
-
 #used during trainig
 majority_class_index = 9   # set which is the ,majority class
 majority_class_frac = 0.998
@@ -50,9 +48,7 @@ for majority_class_frac in majority_class_fracs:
     psnr_list_of_lists = []
     ssim_list_of_lists = []
 
-
     for test_majority_class_index in class_labels:
-
 
 
         test_majority_class_frac = 1.0
@@ -74,7 +70,7 @@ for majority_class_frac in majority_class_fracs:
 
         #Check if you want perturbed inputs
         perturb_test_data = True
-        test_data_noise_percent = 0.1
+        test_data_noise_percent = 0.7
 
         print('train_class_fracs', train_class_fracs )
         print('test_class_fracs', test_class_fracs )

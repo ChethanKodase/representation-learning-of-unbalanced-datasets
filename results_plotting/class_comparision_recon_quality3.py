@@ -54,7 +54,6 @@ for majority_class_frac in majority_class_fracs:
     for test_majority_class_index in class_labels:
 
 
-
         test_majority_class_frac = 1.0
         general_class_frac_in_test = (1.0 - test_majority_class_frac)/(len(class_labels)-1)
         test_class_fracs = [general_class_frac_in_test for i in range(number_of_classes)]
@@ -74,7 +73,7 @@ for majority_class_frac in majority_class_fracs:
 
         #Check if you want perturbed inputs
         perturb_test_data = True
-        test_data_noise_percent = 0.1
+        test_data_noise_percent = 0.5
 
         print('train_class_fracs', train_class_fracs )
         print('test_class_fracs', test_class_fracs )
