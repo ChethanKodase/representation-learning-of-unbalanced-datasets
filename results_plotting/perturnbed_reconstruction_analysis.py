@@ -26,12 +26,12 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 path_models = './saved_models/'
 
-classes = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
+classes = ["T-shirt-top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
 class_labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 number_of_classes =len(class_labels)
 
 
-test_majority_class_index = 9  # the class of which you want the reconstructions
+test_majority_class_index = 9 # the class of which you want the reconstructions
 test_majority_class_frac = 1.0 # fix this value
 general_class_frac_in_test = (1.0 - test_majority_class_frac)/(len(class_labels)-1)
 test_class_fracs = [general_class_frac_in_test for i in range(number_of_classes)]
@@ -65,7 +65,7 @@ train_CNN_VAE = False
 
 #Check if you want perturbed inputs
 perturb_test_data = True
-test_data_noise_percent = 0.5
+test_data_noise_percent = 0.7
 
 print('train_class_fracs', train_class_fracs )
 print('test_class_fracs', test_class_fracs )
@@ -238,7 +238,21 @@ if(train_CNN_VAE):
 
 
 print(reconstructions_mlpvae.shape)
-for i in range(len(reconstructions_mlpvae) - 900):
+
+# plot the reconstructions of the test set images in a grid of 10x10
+fig, axs = plt.subplots(10, 10, figsize=(10, 10))
+for i in range(10):
+    for j in range(10):
+        axs[i,j].imshow(reconstructions_mlpvae[i*10+j][0].cpu().detach().numpy())
+        axs[i,j].axis('off')
+# save the figure in perturbed_Img_reconstructions folder
+
+# save the reconstructions of the test set images in a grid of 10x10
+plt.savefig('./results_plotting/perturbed_Img_reconstructions/perturbation_level_'+str(int(test_data_noise_percent*100))+'_percent/class_'+str(classes[test_majority_class_index])+'_inputPerturbLevel_'+str(int(test_data_noise_percent*100))+'_recons.png')
+
+
+
+'''for i in range(len(reconstructions_mlpvae) - 900):
     plt.imshow(reconstructions_mlpvae[i][0].cpu().detach().numpy())
-    plt.savefig('./experiments/im'+str(i)+'_.png')
+    plt.savefig('./results_plotting/perturbed_Img_reconstructions/class_'+str(test_majority_class_index)+'_recons/im'+str(i)+'_.png')'''
 
