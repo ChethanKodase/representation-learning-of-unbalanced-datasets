@@ -68,7 +68,7 @@ for test_majority_class_index in class_labels:
 
     #Check if you want perturbed inputs
     perturb_test_data = True
-    test_data_noise_percent = 0.7
+    test_data_noise_percent = 0.2
 
     print('train_class_fracs', train_class_fracs )
     print('test_class_fracs', test_class_fracs )
