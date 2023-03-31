@@ -94,7 +94,7 @@ for test_majority_class_index in class_labels:
 
     # Common hyper parameters
     layer_size = 100
-    latent_dim = 4
+    latent_dim = 10
     no_layers = 3
     no_epochs = 100
     inp_dim = [no_channels, dx, dy]
