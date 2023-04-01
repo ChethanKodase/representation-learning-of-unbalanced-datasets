@@ -63,12 +63,12 @@ for test_majority_class_index in class_labels:
     train_AE_REG = False
     train_CNN_AE = False
     train_Contra_AE = False
-    train_MLPVAE= True
-    train_CNN_VAE = False
+    train_MLPVAE= False
+    train_CNN_VAE = True
 
     #Check if you want perturbed inputs
-    perturb_test_data = True
-    test_data_noise_percent = 0.7
+    perturb_test_data = False
+    test_data_noise_percent = 0.1
 
     print('train_class_fracs', train_class_fracs )
     print('test_class_fracs', test_class_fracs )
@@ -94,7 +94,7 @@ for test_majority_class_index in class_labels:
 
     # Common hyper parameters
     layer_size = 100
-    latent_dim = 10
+    latent_dim = 4
     no_layers = 3
     no_epochs = 100
     inp_dim = [no_channels, dx, dy]
@@ -240,18 +240,18 @@ for test_majority_class_index in class_labels:
 
 
 
-    print(reconstructions_mlpvae.shape)
+    print(reconstructions_cnnvae.shape)
 
     # plot the reconstructions of the test set images in a grid of 10x10
     fig, axs = plt.subplots(10, 10, figsize=(10, 10))
     for i in range(10):
         for j in range(10):
-            axs[i,j].imshow(reconstructions_mlpvae[i*10+j][0].cpu().detach().numpy())
+            axs[i,j].imshow(reconstructions_cnnvae[i*10+j][0].cpu().detach().numpy())
             axs[i,j].axis('off')
     # save the figure in perturbed_Img_reconstructions folder
 
     # save the reconstructions of the test set images in a grid of 10x10
-    plt.savefig('./results_plotting/perturbed_Img_reconstructions/perturbation_level_'+str(int(test_data_noise_percent*100))+'_percent/class_'+str(classes[test_majority_class_index])+'_inputPerturbLevel_'+str(int(test_data_noise_percent*100))+'_recons.png')
+    plt.savefig('./results_plotting/perturbed_Img_reconstructions/CNN_VAE/latent_dim'+str(latent_dim)+'/perturbation_level_'+str(int(test_data_noise_percent*100))+'_percent/class_'+str(classes[test_majority_class_index])+'_inputPerturbLevel_'+str(int(test_data_noise_percent*100))+'_recons.png')
 
 
 
