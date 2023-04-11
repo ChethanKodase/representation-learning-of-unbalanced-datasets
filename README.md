@@ -45,5 +45,4 @@ Notes:
 When majority calss fraction of 0.998 is used, the majority class population is 5988 and sample size of rest of the classes is 1.
 
 for majority calss fraction of 0.9995, the autoencoders are trained only with majority class
-
-check
+ 
